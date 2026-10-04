@@ -1,0 +1,58 @@
+{
+  "name": "iptvibe-desktop",
+  "version": "1.6.11",
+  "description": "IPTVibe para Windows e macOS",
+  "author": "IPTVibe",
+  "private": true,
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis --x64 --publish never",
+    "dist:mac": "electron-builder --mac dmg --publish never"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "tv.iptvibe.desktop",
+    "productName": "IPTVibe",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.cjs",
+      "bundle/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "IPTVibe-Setup.exe",
+      "signExecutable": false,
+      "icon": "bundle/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": "dmg",
+      "artifactName": "IPTVibe-Mac-${arch}.dmg",
+      "category": "public.app-category.entertainment",
+      "identity": null,
+      "hardenedRuntime": false,
+      "notarize": false,
+      "minimumSystemVersion": "12.0",
+      "icon": "bundle/dist/assets/icon-512.png"
+    }
+  }
+}

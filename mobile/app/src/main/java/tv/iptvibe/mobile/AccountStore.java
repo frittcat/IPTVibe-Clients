@@ -1,0 +1,10 @@
+package tv.iptvibe.mobile;
+import android.content.Context;import android.security.keystore.*;import android.util.Base64;import java.security.KeyStore;import javax.crypto.*;import javax.crypto.spec.GCMParameterSpec;import java.util.Arrays;
+final class AccountStore {
+ private static Context context;private static String value="";private static final String ALIAS="iptvibe.mobile.account";
+ static void init(Context c){context=c.getApplicationContext();try{String encoded=context.getSharedPreferences("account",0).getString("credential","");if(encoded.isEmpty())return;byte[] bytes=Base64.decode(encoded,Base64.NO_WRAP);Cipher cipher=Cipher.getInstance("AES/GCM/NoPadding");cipher.init(Cipher.DECRYPT_MODE,key(),new GCMParameterSpec(128,Arrays.copyOfRange(bytes,0,12)));value=new String(cipher.doFinal(Arrays.copyOfRange(bytes,12,bytes.length)),"UTF-8");}catch(Exception e){clear();}}
+ private static javax.crypto.SecretKey key()throws Exception{KeyStore ks=KeyStore.getInstance("AndroidKeyStore");ks.load(null);if(!ks.containsAlias(ALIAS)){KeyGenerator gen=KeyGenerator.getInstance("AES","AndroidKeyStore");gen.init(new KeyGenParameterSpec.Builder(ALIAS,KeyProperties.PURPOSE_ENCRYPT|KeyProperties.PURPOSE_DECRYPT).setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build());gen.generateKey();}return (javax.crypto.SecretKey)ks.getKey(ALIAS,null);}
+ static String token(){return value;}
+ static void save(String token)throws Exception{if(!token.matches("[A-Za-z0-9_-]{43}"))throw new Exception();Cipher cipher=Cipher.getInstance("AES/GCM/NoPadding");cipher.init(Cipher.ENCRYPT_MODE,key());byte[] encrypted=cipher.doFinal(token.getBytes("UTF-8")),iv=cipher.getIV(),bytes=new byte[iv.length+encrypted.length];System.arraycopy(iv,0,bytes,0,iv.length);System.arraycopy(encrypted,0,bytes,iv.length,encrypted.length);context.getSharedPreferences("account",0).edit().putString("credential",Base64.encodeToString(bytes,Base64.NO_WRAP)).apply();value=token;}
+ static void clear(){value="";if(context!=null)context.getSharedPreferences("account",0).edit().remove("credential").apply();}
+}
