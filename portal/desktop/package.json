@@ -48,7 +48,7 @@
       "target": "dmg",
       "artifactName": "IPTVibe-Mac-${arch}.dmg",
       "category": "public.app-category.entertainment",
-      "identity": null,
+      "identity": "-",
       "hardenedRuntime": false,
       "notarize": false,
       "minimumSystemVersion": "12.0",
