@@ -22,6 +22,7 @@
     },
     "files": [
       "main.cjs",
+      "update.cjs",
       "bundle/**/*"
     ],
     "win": {

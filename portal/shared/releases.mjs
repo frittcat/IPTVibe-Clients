@@ -1,12 +1,12 @@
 export const REPOSITORY='frittcat/IPTVibe-Runtime';
 export const RELEASES=`https://api.github.com/repos/${REPOSITORY}/releases`;
-const names={tv:['IPTVibe-TV.apk','IPTVibe.apk'],android:['IPTVibe-Mobile.apk'],windows:['IPTVibe-Setup.exe','IPTVibe.msi'],mac:['IPTVibe-arm64.dmg','IPTVibe.dmg'],intel:['IPTVibe-x64.dmg'],linux:['IPTVibe-Linux.AppImage']};
+const names={tv:['IPTVibe-TV.apk','IPTVibe.apk'],android:['IPTVibe-Mobile.apk'],windows:['IPTVibe-Setup.exe','IPTVibe.msi'],mac:['IPTVibe-Mac-arm64.dmg','IPTVibe-arm64.dmg','IPTVibe.dmg'],intel:['IPTVibe-Mac-x64.dmg','IPTVibe-x64.dmg'],linux:['IPTVibe-Linux.AppImage']};
 export function artifact(release,platform){
  if(!release||release.draft||release.prerelease)return null;
  const a=(names[platform]||[]).map(n=>release.assets?.find(x=>x.name===n)).find(Boolean);
  if(!a||a.state!=='uploaded'||!(a.size>0)||!/^sha256:[a-f0-9]{64}$/.test(a.digest||''))return null;
  const prefix=`https://github.com/${REPOSITORY}/releases/download/`;
- if(!a.browser_download_url?.startsWith(prefix))return null;
+ if(a.browser_download_url!==prefix+release.tag_name+'/'+a.name)return null;
  return {name:a.name,url:a.browser_download_url,size:a.size,sha256:a.digest.slice(7),version:release.tag_name.replace(/^v/,''),date:release.published_at,architecture:platform==='tv'||platform==='android'?'Android':platform==='mac'?'Apple Silicon':platform==='intel'?'Intel x64':'x64'};
 }
 export function detectDevice(ua,platform='',touch=0){
