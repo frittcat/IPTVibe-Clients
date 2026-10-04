@@ -8,7 +8,7 @@ const base=new URL(site).pathname.replace(/\/$/,'');const out=path.resolve('dist
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const link=p=>base+(p==='/'?'/':p);const btn=(t,p,primary=false)=>`<a class="btn${primary?' primary':''}" href="${link(p)}">${t} <span aria-hidden="true">↗</span></a>`;
 await mkdir(out,{recursive:true});await mkdir(path.join(out,'assets'),{recursive:true});await cp('assets',path.join(out,'assets'),{recursive:true});await cp('shared',path.join(out,'shared'),{recursive:true});
-const r=await fetch(RELEASES+'?per_page=20',{headers:{Accept:'application/vnd.github+json'},signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Não foi possível obter os releases oficiais: '+r.status);
+const releaseHeaders={Accept:'application/vnd.github+json'};if(process.env.GH_TOKEN)releaseHeaders.Authorization='Bearer '+process.env.GH_TOKEN;const r=await fetch(RELEASES+'?per_page=20',{headers:releaseHeaders,signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Não foi possível obter os releases oficiais: '+r.status);
 const releases=(await r.json()).filter(x=>!x.draft&&!x.prerelease);const current=releases[0];if(!artifact(current,'tv'))throw Error('APK estável sem digest oficial');
 await writeFile(path.join(out,'releases.json'),JSON.stringify({checkedAt:new Date().toISOString(),releases}));
 const icon=await readFile('assets/icon.svg');for(const size of [192,512])await sharp(icon).resize(size,size).png().toFile(path.join(out,`assets/icon-${size}.png`));
