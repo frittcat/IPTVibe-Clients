@@ -2,7 +2,7 @@ plugins { id 'com.android.application' }
 android {
  namespace 'tv.iptvibe.mobile'
  compileSdk 37
- defaultConfig { applicationId 'tv.iptvibe.mobile'; minSdk 26; targetSdk 35; versionCode 50034; versionName '1.6.12' }
+ defaultConfig { applicationId 'tv.iptvibe.mobile'; minSdk 26; targetSdk 35; versionCode 50035; versionName '1.6.13' }
  buildTypes { release { minifyEnabled false } }
  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
 }
