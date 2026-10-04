@@ -1,0 +1,65 @@
+name: Deploy IPTVibe portal
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'portal/**'
+      - '.github/workflows/deploy-portal.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iptvibe-pages-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: ${{ vars.CLOUDFLARE_READY == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: portal/package-lock.json
+
+      - name: Verify and build portal
+        working-directory: portal
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Verify Cloudflare credentials are configured
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+
+      - name: Deploy production portal
+        working-directory: portal
+        run: npx wrangler pages deploy dist --project-name iptvibe --branch main --commit-hash "${GITHUB_SHA}"
+
+      - name: Verify deployed brand
+        shell: bash
+        run: |
+          for i in $(seq 1 12); do
+            curl --fail --silent --show-error --location --max-time 15               https://iptvibe.pages.dev/assets/icon-192.png               -o "$RUNNER_TEMP/live-icon.png" || true
+            if cmp -s "$RUNNER_TEMP/live-icon.png" portal/dist/assets/icon-192.png; then
+              echo "Official IPTVibe brand is live."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Cloudflare deploy completed but production icon did not converge in time."
+          exit 1
