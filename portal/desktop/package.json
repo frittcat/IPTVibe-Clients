@@ -53,6 +53,15 @@
       "notarize": false,
       "minimumSystemVersion": "12.0",
       "icon": "bundle/dist/assets/icon-512.png"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "frittcat",
+      "repo": "IPTVibe-Runtime"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frittcat/IPTVibe-Clients.git"
   }
 }
